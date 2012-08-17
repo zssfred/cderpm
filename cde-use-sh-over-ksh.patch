@@ -1,0 +1,54 @@
+diff -up cde/admin/IntegTools/dbTools/dinstallCDE.src.orig cde/admin/IntegTools/dbTools/dinstallCDE.src
+--- cde/admin/IntegTools/dbTools/dinstallCDE.src.orig	2012-08-16 15:53:41.000000000 -0400
++++ cde/admin/IntegTools/dbTools/dinstallCDE.src	2012-08-17 09:24:39.835076323 -0400
+@@ -1,4 +1,4 @@
+-XCOMM! /bin/ksh
++XCOMM! /bin/sh
+ XCOMM $XConsortium: dinstallCDE.src /main/8 1996/11/25 14:20:36 drk $
+ 
+ XCOMM
+diff -up cde/admin/IntegTools/dbTools/installCDE.src.orig cde/admin/IntegTools/dbTools/installCDE.src
+--- cde/admin/IntegTools/dbTools/installCDE.src.orig	2012-08-16 15:53:41.000000000 -0400
++++ cde/admin/IntegTools/dbTools/installCDE.src	2012-08-17 09:24:44.898963576 -0400
+@@ -1,4 +1,4 @@
+-XCOMM! /bin/ksh
++XCOMM! /bin/sh
+ XCOMM $XConsortium: installCDE.src /main/20 1996/11/25 14:21:13 drk $
+ 
+ XCOMM
+diff -up cde/admin/IntegTools/dbTools/linksLast.orig cde/admin/IntegTools/dbTools/linksLast
+--- cde/admin/IntegTools/dbTools/linksLast.orig	2012-08-16 15:53:41.000000000 -0400
++++ cde/admin/IntegTools/dbTools/linksLast	2012-08-17 09:24:51.250929020 -0400
+@@ -1,4 +1,4 @@
+-#! /bin/ksh
++#! /bin/sh
+ 
+ #
+ # Script to move all link refereces in a ".lst" file
+diff -up cde/admin/IntegTools/dbTools/mkProd.orig cde/admin/IntegTools/dbTools/mkProd
+--- cde/admin/IntegTools/dbTools/mkProd.orig	2012-08-16 15:53:41.000000000 -0400
++++ cde/admin/IntegTools/dbTools/mkProd	2012-08-17 09:24:55.163074784 -0400
+@@ -1,4 +1,4 @@
+-#! /bin/ksh 
++#! /bin/sh 
+ 
+ export SYSTYPE=bsd4.3
+ 
+diff -up cde/admin/IntegTools/dbTools/udbToAny.ksh.orig cde/admin/IntegTools/dbTools/udbToAny.ksh
+--- cde/admin/IntegTools/dbTools/udbToAny.ksh.orig	2012-08-16 15:53:41.000000000 -0400
++++ cde/admin/IntegTools/dbTools/udbToAny.ksh	2012-08-17 09:25:04.780070863 -0400
+@@ -1,4 +1,4 @@
+-#!/bin/ksh 
++#!/bin/sh 
+ 
+ # ------------------------------------------------------------- 
+ #  udbToAny.ksh 
+diff -up cde/admin/IntegTools/dbTools/uncomment.orig cde/admin/IntegTools/dbTools/uncomment
+--- cde/admin/IntegTools/dbTools/uncomment.orig	2012-08-16 15:53:41.000000000 -0400
++++ cde/admin/IntegTools/dbTools/uncomment	2012-08-17 09:25:08.892076444 -0400
+@@ -1,4 +1,4 @@
+-#! /bin/ksh
++#! /bin/sh
+ 
+ #
+ # Script to remove comments and blank lines from ".lst" files
