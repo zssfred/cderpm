@@ -1,1 +1,5 @@
 *.tar.xz
+BUILD
+BUILDROOT
+RPMS
+SRPMS
