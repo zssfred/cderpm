@@ -1,0 +1,21 @@
+- Modify checkout-cde.sh so it optionally honors the %checkout tag from
+  cde.spec and checks out that specific tag to generate the source
+  archive.
+
+- Change all #!/bin/ksh references to #!/bin/sh, at least for the build
+  time requirements.  Runtime requirements may still insist on ksh.
+
+- Patch installCDE so it installs to locations writable by a non-root
+  user.
+
+- Add a gdm session script to the package.
+
+- Figure out what files are necessary for building docs and build docs.
+
+- See if the host.def hack can be eliminated in favor of -m64/-m32
+
+- Get dtksh building.
+
+- Add an init script for the calendar rpc service.
+
+- Figure out what iptables rules are necessary for ToolTalk.
