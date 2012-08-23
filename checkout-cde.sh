@@ -12,5 +12,6 @@ find cdesktopenv-code -type d -name .git | xargs rm -rf
 OUTPUT="cde-${VER}-${DATESTAMP}git${GITHASH}.tar.xz"
 tar -cvf - cdesktopenv-code | xz -9c > ${OUTPUT}
 rm -rf cdesktopenv-code
+sha1sum ${OUTPUT} > ${CWD}/sources
 echo
 echo "New source archived to ${OUTPUT}"
