@@ -1,15 +1,13 @@
-- Change all #!/bin/ksh references to #!/bin/sh, at least for the build
-  time requirements.  Runtime requirements may still insist on ksh.
-
-- Patch installCDE so it installs to locations writable by a non-root
-  user.
-
+- Get cde.spec building on RHEL-6
+- Get cde.spec building on RHEL-7
+- Get cde.spec building on Fedora
+- Add gdm launch definitions so the default dm can have a CDE session.
+- Test on RHEL-6
+- Test on RHEL-7
+- Test on Fedora
+- Does the runtime need /bin/ksh?  If so, add a Requires for that.
 - Add a gdm session script to the package.
-
 - Figure out what files are necessary for building docs and build docs.
-
-- Get dtksh building.
-
+- Get dtksh building (does it build as of 2.2.4?).
 - Add an init script for the calendar rpc service.
-
 - Figure out what iptables rules are necessary for ToolTalk.
