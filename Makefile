@@ -13,12 +13,12 @@ all: fetch
 fetch:
 	@while read checksum filename ; do \
 		if [ -f ${CWD}/$${filename} ]; then \
-			computed="$$(sha1sum $(CWD)/$${filename} | cut -d ' ' -f 1)" ; \
+			computed="$$(sha256sum $(CWD)/$${filename} | cut -d ' ' -f 1)" ; \
 			if [ "$${computed}" = "$${checksum}" ]; then \
 				echo "Already have $${filename} and it checks out." ; \
 			else \
 				curl -O $(URL)/$${filename} ; \
-				computed="$$(sha1sum $(CWD)/$${filename} | cut -d ' ' -f 1)" ; \
+				computed="$$(sha256sum $(CWD)/$${filename} | cut -d ' ' -f 1)" ; \
 				if [ ! "$${computed}" = "$${checksum}" ]; then \
 					echo "*** INVALID CHECKSUM $${filename}" ; \
 					exit 1 ; \
@@ -26,7 +26,7 @@ fetch:
 			fi ; \
 		else \
 			curl -O $(URL)/$${filename} ; \
-			computed="$$(sha1sum $(CWD)/$${filename} | cut -d ' ' -f 1)" ; \
+			computed="$$(sha256sum $(CWD)/$${filename} | cut -d ' ' -f 1)" ; \
 			if [ ! "$${computed}" = "$${checksum}" ]; then \
 				echo "*** INVALID CHECKSUM $${filename}" ; \
 				exit 1 ; \

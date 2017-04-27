@@ -1,5 +1,3 @@
-%define checkout 20120816gitce4004f
-
 %ifarch x86_64
 %define _archflag -m64
 %endif
@@ -9,8 +7,8 @@
 %endif
 
 Name:                cde
-Version:             2.2.0
-Release:             3.%{checkout}%{?dist}
+Version:             2.2.4
+Release:             1%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -21,81 +19,61 @@ URL:                 http://cdesktopenv.sourceforge.net/
 # Source repo can be cloned this way:
 #     git clone git://git.code.sf.net/p/cdesktopenv/code cdesktopenv-code
 # The checkout-cde.sh generates the source archives used by this spec file.
-Source0:             %{name}-%{version}-%{checkout}.tar.xz
+Source0:             %{name}-src-%{version}.tar.gz
 Source1:             checkout-cde.sh
 
-Patch0:              cde-fix-udbParseLib.awk.patch
-Patch1:              cde-use-sh-over-ksh.patch
-
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
-BuildRequires:       xorg-x11-xbitmaps
+
+# These BuildRequires come from the main RHEL repo.
 BuildRequires:       xorg-x11-proto-devel
 BuildRequires:       openmotif-devel
 BuildRequires:       chrpath
+
+# These BuildRequires come from the RHEL Optional repo.
+BuildRequires:       xorg-x11-xbitmaps
 
 %description
 CDE is the Common Desktop Environment from The Open Group.
 
 %prep
-%setup -q -n cdesktopenv-code/cde
-
-# Fix the awk script used to create the installation tarball so it works with gawk.
-%patch0 -p1
-
-# Use #!/bin/sh instead of #!/bin/ksh in the installation tools.
-%patch1 -p1
-
-# The build system expects to find X headers in the local tree.
-mkdir -p imports/x11/include
-cd imports/x11/include
-ln -s /usr/include/X11 .
+%setup -q
 
 %build
-[ -d %{buildroot} ] && chmod -R u+w %{buildroot}
-rm -rf %{buildroot}
-# XXX: this should be make World, but will figure out docs later
-%{__make} World.dev BOOTSTRAPCFLAGS="%{optflags} %{_archflag}"
+%{__make} World BOOTSTRAPCFLAGS="%{optflags} %{_archflag}"
 
 %install
-[ -d %{buildroot} ] && chmod -R u+w %{buildroot}
-rm -rf %{buildroot}
-mkdir -p %{buildroot}
-
-# The installation creates a dt.tar file that we extract to buildroot.
-CDE=$(pwd)
-cd ${CDE}/admin/IntegTools/dbTools
-./installCDE -s ${CDE} -t ${CDE}/tars -nocompress
-DTTAR="$(find ${CDE}/tars -name dt.tar)"
-tar -C %{buildroot} -xpsvf ${DTTAR}
-chmod -R u+w %{buildroot}
+%{__make} install DESTDIR="%{buildroot}"
 
 # Remove the rpath setting from ELF objects.
 # XXX: This is a heavy hammer which should really be fixed by not using -rpath
 # in the build in the first place.  Baby steps.
 find %{buildroot}%{_prefix}/dt/bin -type f | \
-    grep -v -E "(Xsession|dtappintegrate|dtdocbook|dterror\.ds|dtfile_error|dthelpgen\.ds|dthelpprint\.sh|dthelptag|dtinfogen|dtlp|dtsession_res|ttrmdir)" | \
+    grep -v -E "(nsgmls|lndir|mergelib|xon)" | \
     xargs chrpath -d
 find %{buildroot}%{_prefix}/dt/lib -type f -name "lib*.so*" | xargs chrpath -d
 find %{buildroot}%{_prefix}/dt/lib/dtudcfonted -type f -name "dt*" | xargs chrpath -d
-chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/instant
-chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/xlate_locale
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/nsgmls
+#chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/instant
+#chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/xlate_locale
+#chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/nsgmls
 
 # Create other required directories.
-mkdir -p %{buildroot}%{_sysconfdir}/dt
-mkdir -p %{buildroot}%{_localstatedir}/dt
+#mkdir -p %{buildroot}%{_sysconfdir}/dt
+#mkdir -p %{buildroot}%{_localstatedir}/dt
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc CONTRIBUTORS COPYING README copyright
+%doc CONTRIBUTORS COPYING README copyright HISTORY
 %{_prefix}/dt
 %{_localstatedir}/dt
 %config %{_sysconfdir}/dt
 
 %changelog
+* Thu Apr 27 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-1
+- First update of this package to CDE 2.2.4
+
 * Thu Aug 23 2012 David Cantrell <dcantrell@redhat.com> - 2.2.0-3.20120816gitce4004f
 - Unpack dt.tar in the buildroot, create required directories
 - Disable the use of -Wl,-rpath,PATH during the build
