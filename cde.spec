@@ -44,21 +44,22 @@ CDE is the Common Desktop Environment from The Open Group.
 %install
 %{__make} install DESTDIR="%{buildroot}"
 
+# Move things to the right place
+mv %{buildroot}/bin/* %{buildroot}%{_prefix}/dt/bin
+rmdir %{buildroot}/bin
+
 # Remove the rpath setting from ELF objects.
 # XXX: This is a heavy hammer which should really be fixed by not using -rpath
 # in the build in the first place.  Baby steps.
+chmod 0755 %{buildroot}%{_prefix}/dt/bin/nsgmls
 find %{buildroot}%{_prefix}/dt/bin -type f | \
-    grep -v -E "(nsgmls|lndir|mergelib|xon)" | \
+    grep -v -E "(lndir|mergelib|xon|makeg|xmkmf|mkdirhier)" | \
     xargs chrpath -d
 find %{buildroot}%{_prefix}/dt/lib -type f -name "lib*.so*" | xargs chrpath -d
-find %{buildroot}%{_prefix}/dt/lib/dtudcfonted -type f -name "dt*" | xargs chrpath -d
-#chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/instant
-#chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/xlate_locale
-#chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/nsgmls
 
 # Create other required directories.
-#mkdir -p %{buildroot}%{_sysconfdir}/dt
-#mkdir -p %{buildroot}%{_localstatedir}/dt
+mkdir -p %{buildroot}%{_sysconfdir}/dt
+mkdir -p %{buildroot}%{_localstatedir}/dt
 
 %clean
 rm -rf %{buildroot}
