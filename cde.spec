@@ -8,7 +8,7 @@
 
 Name:                cde
 Version:             2.2.4
-Release:             1%{?dist}
+Release:             2%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -48,6 +48,13 @@ CDE is the Common Desktop Environment from The Open Group.
 mv %{buildroot}/bin/* %{buildroot}%{_prefix}/dt/bin
 rmdir %{buildroot}/bin
 
+mkdir -p %{buildroot}%{_datadir}/X11/app-defaults
+mv %{buildroot}/app-defaults/C/* %{buildroot}%{_datadir}/X11/app-defaults
+rm -rf %{buildroot}/app-defaults
+
+mkdir -p %{buildroot}%{_includedir}/X11
+mv %{buildroot}/C %{buildroot}%{_includedir}/X11/bitmaps
+
 # Remove the rpath setting from ELF objects.
 # XXX: This is a heavy hammer which should really be fixed by not using -rpath
 # in the build in the first place.  Baby steps.
@@ -61,6 +68,15 @@ find %{buildroot}%{_prefix}/dt/lib -type f -name "lib*.so*" | xargs chrpath -d
 mkdir -p %{buildroot}%{_sysconfdir}/dt
 mkdir -p %{buildroot}%{_localstatedir}/dt
 
+# These are provided by the Motif package
+pushd %{buildroot}%{_includedir}/X11/bitmaps
+rm -f xm_hour16 xm_hour16m xm_hour32 xm_hour32m xm_noenter16 xm_noenter16m xm_noenter32 xm_noenter32m
+popd
+
+# XXX: Does this need to exist somewhere?
+rm -rf %{buildroot}/infolib
+rm -rf %{buildroot}/ja
+
 %clean
 rm -rf %{buildroot}
 
@@ -69,9 +85,14 @@ rm -rf %{buildroot}
 %doc CONTRIBUTORS COPYING README copyright HISTORY
 %{_prefix}/dt
 %{_localstatedir}/dt
+%{_includedir}/X11/bitmaps
+%{_datadir}/X11/app-defaults
 %config %{_sysconfdir}/dt
 
 %changelog
+* Wed May 10 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-2
+- Sort out the file list and get things moved to the correct place
+
 * Thu Apr 27 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-1
 - First update of this package to CDE 2.2.4
 
