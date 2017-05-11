@@ -8,7 +8,7 @@
 
 Name:                cde
 Version:             2.2.4
-Release:             2%{?dist}
+Release:             3%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -28,6 +28,7 @@ BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 BuildRequires:       xorg-x11-proto-devel
 BuildRequires:       openmotif-devel
 BuildRequires:       chrpath
+BuildRequires:       ksh
 
 # These BuildRequires come from the RHEL Optional repo.
 BuildRequires:       xorg-x11-xbitmaps
@@ -42,18 +43,28 @@ CDE is the Common Desktop Environment from The Open Group.
 %{__make} World BOOTSTRAPCFLAGS="%{optflags} %{_archflag}"
 
 %install
-%{__make} install DESTDIR="%{buildroot}"
+[ -d %{buildroot} ] && chmod -R u+w %{buildroot}
+rm -rf %{buildroot}
+mkdir -p %{buildroot}
 
-# Move things to the right place
-mv %{buildroot}/bin/* %{buildroot}%{_prefix}/dt/bin
-rmdir %{buildroot}/bin
+# The installation creates a dt.tar file that we extract to buildroot.
+CDE=$(pwd)
+cd ${CDE}/admin/IntegTools/dbTools
+./installCDE -s ${CDE} -t ${CDE}/tars -nocompress
+DTTAR="$(find ${CDE}/tars -name dt.tar)"
+tar -C %{buildroot} -xpsvf ${DTTAR}
+chmod -R u+w %{buildroot}
 
-mkdir -p %{buildroot}%{_datadir}/X11/app-defaults
-mv %{buildroot}/app-defaults/C/* %{buildroot}%{_datadir}/X11/app-defaults
-rm -rf %{buildroot}/app-defaults
+## Move things to the right place
+#mv %{buildroot}/bin/* %{buildroot}%{_prefix}/dt/bin
+#rmdir %{buildroot}/bin
 
-mkdir -p %{buildroot}%{_includedir}/X11
-mv %{buildroot}/C %{buildroot}%{_includedir}/X11/bitmaps
+#mkdir -p %{buildroot}%{_datadir}/X11/app-defaults
+#mv %{buildroot}/app-defaults/C/* %{buildroot}%{_datadir}/X11/app-defaults
+#rm -rf %{buildroot}/app-defaults
+
+#mkdir -p %{buildroot}%{_includedir}/X11
+#mv %{buildroot}/C %{buildroot}%{_includedir}/X11/bitmaps
 
 # Remove the rpath setting from ELF objects.
 # XXX: This is a heavy hammer which should really be fixed by not using -rpath
@@ -69,13 +80,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/dt
 mkdir -p %{buildroot}%{_localstatedir}/dt
 
 # These are provided by the Motif package
-pushd %{buildroot}%{_includedir}/X11/bitmaps
-rm -f xm_hour16 xm_hour16m xm_hour32 xm_hour32m xm_noenter16 xm_noenter16m xm_noenter32 xm_noenter32m
-popd
+#pushd %{buildroot}%{_includedir}/X11/bitmaps
+#rm -f xm_hour16 xm_hour16m xm_hour32 xm_hour32m xm_noenter16 xm_noenter16m xm_noenter32 xm_noenter32m
+#popd
 
 # XXX: Does this need to exist somewhere?
-rm -rf %{buildroot}/infolib
-rm -rf %{buildroot}/ja
+#rm -rf %{buildroot}/infolib
+#rm -rf %{buildroot}/ja
 
 %clean
 rm -rf %{buildroot}
@@ -85,11 +96,13 @@ rm -rf %{buildroot}
 %doc CONTRIBUTORS COPYING README copyright HISTORY
 %{_prefix}/dt
 %{_localstatedir}/dt
-%{_includedir}/X11/bitmaps
-%{_datadir}/X11/app-defaults
 %config %{_sysconfdir}/dt
 
 %changelog
+* Thu May 11 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-3
+- Shift to using installCDE to install the build
+- Add ksh as a BuildRequires
+
 * Wed May 10 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-2
 - Sort out the file list and get things moved to the correct place
 
