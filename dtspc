@@ -1,0 +1,13 @@
+service dtspc
+{
+	disable		= no
+	id		= dtspc-stream
+	type		= TCPMUX
+	wait		= no
+	socket_type	= stream
+	user		= root
+	group		= root
+	server		= /usr/dt/bin/dtspcd
+	log_type        = SYSLOG
+	only_from	= 127.0.0.1
+}

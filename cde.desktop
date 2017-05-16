@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=CDE
+Comment=Common Desktop Environment
+Exec=/usr/dt/bin/Xsession
+Icon=
+Type=Application
