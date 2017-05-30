@@ -1,0 +1,19 @@
+1) Install the RPM for your platform.
+
+2) Make sure SELinux is disabled:
+       setenforce Permissive
+
+3) Make sure rpcbind is running:
+       RHEL or CentOS 7.x:
+           systemctl enable rpcbind.service
+           systemctl start rpcbind.service
+
+       RHEL or CentOS 6.x:
+           chkconfig enable rpcbind
+           service rpcbind start
+
+   NOTE: rpcbind should be running with "-i" as an argument.  This is set
+   in /etc/sysconfig/rpcbind by the RPM %post scriptlet.
+
+4) You probably want to disable the firewall or figure out which ports to
+   poke holes for.
