@@ -8,7 +8,7 @@
 
 Name:                cde
 Version:             2.2.4
-Release:             4%{?dist}
+Release:             5%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -29,17 +29,51 @@ Source6:             cde.desktop
 
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
-# Runtime requirements
 Requires:            xinetd
+Requires:            ksh
+Requires:            xorg-x11-xinit
+Requires:            xorg-x11-utils
+Requires:            xorg-x11-server-utils
+Requires:            ncompress
+Requires:            rpcbind
+Requires:            xorg-x11-server-Xorg
+Requires:            xorg-x11-fonts-ISO8859-1-100dpi
+Requires:            xorg-x11-fonts-ISO8859-2-100dpi
+Requires:            xorg-x11-fonts-ISO8859-9-100dpi
+Requires:            xorg-x11-fonts-ISO8859-14-100dpi
+Requires:            xorg-x11-fonts-ISO8859-15-100dpi
+Requires:            xorg-x11-fonts-100dpi
 
-# These BuildRequires come from the main RHEL repo.
 BuildRequires:       xorg-x11-proto-devel
+%if 0%{?rhel} >= 7
+BuildRequires:       motif-devel
+%endif
+%if 0%{?rhel} <= 6
 BuildRequires:       openmotif-devel
+%endif
 BuildRequires:       chrpath
 BuildRequires:       ksh
-
-# These BuildRequires come from the RHEL Optional repo.
+BuildRequires:       m4
+BuildRequires:       ncompress
+BuildRequires:       bison
+BuildRequires:       byacc
+BuildRequires:       gcc-c++
+BuildRequires:       libXp-devel
+BuildRequires:       libXt-devel
+BuildRequires:       libXmu-devel
+BuildRequires:       libXft-devel
+BuildRequires:       libXinerama-devel
+BuildRequires:       libXpm-devel
+BuildRequires:       libXaw-devel
+BuildRequires:       libX11-devel
+BuildRequires:       libXScrnSaver-devel
+BuildRequires:       libjpeg-turbo-devel
+BuildRequires:       freetype-devel
+BuildRequires:       openssl-devel
+BuildRequires:       tcl-devel
 BuildRequires:       xorg-x11-xbitmaps
+BuildRequires:       libtirpc-devel
+BuildRequires:       libXdmcp-devel
 
 %description
 CDE is the Common Desktop Environment from The Open Group.
@@ -75,7 +109,7 @@ popd
 # XXX: This is a heavy hammer which should really be fixed by not using -rpath
 # in the build in the first place.  Baby steps.
 find %{buildroot}%{_prefix}/dt/bin -type f | \
-    grep -v -E "(lndir|mergelib|xon|makeg|xmkmf|mkdirhier|dtinfogen|dthelpgen.ds|dtlp|dtappintegrate|dtdocbook|Xsession|dtfile_error|dterror.ds|dthelptag|dthelpprint.sh)" | \
+    grep -v -E "(lndir|mergelib|xon|makeg|xmkmf|mkdirhier|dtinfogen|dthelpgen.ds|dtlp|dtappintegrate|dtdocbook|Xsession|dtfile_error|dterror.ds|dthelptag|dthelpprint.sh|dtsession_res)" | \
     xargs chrpath -d
 find %{buildroot}%{_prefix}/dt/lib -type f -name "lib*.so*" | xargs chrpath -d
 chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/instant
@@ -153,6 +187,9 @@ rm -rf $TMPDIR
 %{_datadir}/xsessions
 
 %changelog
+* Tue May 30 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-5
+- Updated spec file for CentOS 7.x building
+
 * Tue May 16 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-4
 - Complete packaging using the installCDE script
 - Initial set of configuration files and control scripts

@@ -5,7 +5,7 @@ CWD := $(shell pwd)
 RPMBUILD = rpmbuild --define='_topdir $(CWD)' \
                     --define='_sourcedir $(CWD)' \
                     --define='_specdir $(CWD)'
-URL = http://www.burdell.org/cde/
+URL = https://www.burdell.org/cde/
 
 all: fetch
 	$(RPMBUILD) -ba cde.spec
@@ -33,14 +33,6 @@ fetch:
 			fi ; \
 		fi ; \
 	done < $(CWD)/sources
-
-publish:
-	@for subdir in RPMS SRPMS ; do \
-		[ -d $(CWD)/$${subdir} ] || continue ; \
-		ssh site5 mkdir -p public_html/cde/$${subdir} ; \
-		rsync -avz --rsh=ssh --progress $(CWD)/$${subdir}/ \
-			site5:public_html/cde/$${subdir}/ ; \
-	done
 
 prep:
 	$(RPMBUILD) -bp cde.spec
