@@ -1,0 +1,67 @@
+This source tree keeps the spec file, patches, and other files that are not
+part of the CDE source release.  The Makefile tries to make easier to build
+RPM and SRPM files.
+
+
+FETCH THE SOURCE
+
+You'll need the source for CDE to do anything:
+
+    make fetch
+
+These are downloaded from https://www.burdell.org/cde/ because the upstream
+project releases on SourceFroge which does not permit curl(1) or wget(1) to
+easily download links.  The 'sources' file lists the source archive(s) needed
+for CDE and a digest that is verified once downloaded.  
+
+
+BUILD THE RPM
+
+You can build the RPM directly on your host system by typing:
+
+    make
+
+Note this will build on whatever system you are currently running and the
+expectation is that you are using an RPM-based system, preferably Fedora,
+RHEL, or CentOS.  Anything else I do not currently support, but I am more
+than happy to accept patches.
+
+
+BUILD AN SRPM AND USE MOCK
+
+A better way to build once you get a comfortable release point is to build in
+mock(1).  This is a chroot build jail that allows you to target other RPM-based
+systems while not necessarily running the same version.  For example, on my
+system running RHEL, I can build for Fedora or CentOS.  Or the other way around.
+
+To get started, initialize the mock build root:
+
+    mock -r centos-7-x86_64 --init
+
+Now build the source RPM (SRPM):
+
+    make source
+
+Now build that SRPM in mock:
+
+    mock -r centos-7-x86_64 rebuild SRPMS/*.src.rpm
+
+The rebuild command will clean and initialize the root tree as well, in theory.
+To remove or clean the build root, run:
+
+    mock -r centos-7-x86_64 --clean
+
+It's a good idea to start with --clean first and then do --init.
+
+
+CLEAN THIS TREE
+
+To get rid of files that are not tracked by git, you have two options:
+
+    git clean -d -x -f
+
+Or:
+
+    make clean
+
+The choice is yours entirely.
