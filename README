@@ -16,9 +16,10 @@ CDE package for Red Hat Enterprise Linux and Fedora Linux systems.
 TARGET PLATFORMS
 ----------------
 
-Red Hat Enterprise Linux 7 (x86_64 and i686)
-Red Hat Enterprise Linux 6 (x86_64 and i686)
-CentOS 6 (x86_64 and i686)
+Red Hat Enterprise Linux 7 (x86_64)
+Red Hat Enterprise Linux 6 (x86_64)
+CentOS 7 (x86_64)
+CentOS 6 (x86_64)
 
 I may not have all platforms building at a given time, which is why I refer to
 them as targets rather than requirements.  I'm always interested in patches to
