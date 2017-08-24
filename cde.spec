@@ -8,7 +8,7 @@
 
 Name:                cde
 Version:             2.2.4
-Release:             5%{?dist}
+Release:             6%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -26,6 +26,10 @@ Source3:             dt.sh
 Source4:             dt.csh
 Source5:             dtspc
 Source6:             cde.desktop
+Source7:             fonts.alias
+Source8:             fonts.dir
+
+Patch0:              cde-2.2.4-ttdbserver.patch
 
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
@@ -80,6 +84,7 @@ CDE is the Common Desktop Environment from The Open Group.
 
 %prep
 %setup -q
+%patch0 -p1
 
 sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 
@@ -137,6 +142,8 @@ install -D -m 0600 contrib/xinetd/ttdbserver %{buildroot}%{_sysconfdir}/xinetd.d
 install -D -m 0600 contrib/xinetd/cmsd %{buildroot}%{_sysconfdir}/xinetd.d/cmsd
 install -D -m 0600 %SOURCE5 %{buildroot}%{_sysconfdir}/xinetd.d/dtspc
 install -D -m 0644 %SOURCE6 %{buildroot}%{_datadir}/xsessions/cde.desktop
+install -D -m 0644 %SOURCE7 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.alias
+install -D -m 0644 %SOURCE8 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.dir
 
 %clean
 rm -rf %{buildroot}
@@ -159,6 +166,33 @@ else
     echo "RPCBIND_ARGS=\"-i\"" >> /etc/sysconfig/rpcbind
 fi
 
+# Tell users what needs to happen once they have installed
+echo
+echo
+echo "***************************************"
+echo "* Important postinstall steps for CDE *"
+echo "***************************************"
+echo
+echo "1) Enable and start rpcbind:"
+if [ -x /usr/sbin/systemctl ]; then
+    echo "   systemctl enable rpcbind.service"
+    echo "   systemctl start rpcbind.service"
+else
+    echo "   chkconfig rpcbind on"
+    echo "   service rpcbind start"
+fi
+echo
+echo "2) Enable and start xinetd:"
+if [ -x /usr/sbin/systemctl ]; then
+    echo "   systemctl enable xinetd.service"
+    echo "   systemctl start xinetd.service"
+else
+    echo "   chkconfig xinetd on"
+    echo "   service xinetd start"
+fi
+echo
+echo
+
 %postun
 PATH=/bin:/usr/bin
 TMPDIR="$(mktemp -d)"
@@ -176,7 +210,7 @@ rm -rf $TMPDIR
 %defattr(-,root,root,-)
 %doc CONTRIBUTORS COPYING README copyright HISTORY
 %{_prefix}/dt
-%{_localstatedir}/dt
+%attr(1777, root, root) %{_localstatedir}/dt
 %config %{_sysconfdir}/ld.so.conf.d/dt.conf
 %config %{_sysconfdir}/profile.d/dt.sh
 %config %{_sysconfdir}/profile.d/dt.csh
@@ -184,9 +218,18 @@ rm -rf $TMPDIR
 %config %{_sysconfdir}/xinetd.d/cmsd
 %config %{_sysconfdir}/xinetd.d/dtspc
 %config %{_sysconfdir}/xinetd.d/ttdbserver
+%config %{_sysconfdir}/dt/config/xfonts/C/fonts.alias
+%config %{_sysconfdir}/dt/config/xfonts/C/fonts.dir
 %{_datadir}/xsessions
 
 %changelog
+* Thu Aug 24 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-6
+- Add fonts.alias and fonts.dir files for /etc/dt/config/xfonts/C
+- Patch /etc/xinetd.d/ttdbserver file to enable by default
+- Ensure /var/dt is installed with 1777 permissions
+- In the RPM postinstall script, tell the user to make sure rpcbind
+  and xinetd services are enabled
+
 * Tue May 30 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-5
 - Updated spec file for CentOS 7.x building
 
