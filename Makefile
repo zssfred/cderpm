@@ -50,4 +50,4 @@ clean:
 	-rm -rf BUILD BUILDROOT RPMS SRPMS
 	while read checksum filename ; do \
 		[ -f "$$filename" ] && rm -f "$$filename" ; \
-	done
+	done < $(CWD)/sources
