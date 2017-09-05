@@ -55,6 +55,8 @@ tag:
 
 clean:
 	-rm -rf BUILD BUILDROOT RPMS SRPMS
+
+realclean: clean
 	while read checksum filename ; do \
 		[ -f "$$filename" ] && rm -f "$$filename" ; \
 	done < $(CWD)/sources
