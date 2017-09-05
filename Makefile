@@ -51,7 +51,7 @@ source:
 	$(RPMBUILD) -bs cde.spec
 
 tag:
-	git tag -s $(NAME)-$(VERSION)-$(RELEASE)
+	git tag -m "Tag $(NAME)-$(VERSION)-$(RELEASE)" $(NAME)-$(VERSION)-$(RELEASE)
 
 clean:
 	-rm -rf BUILD BUILDROOT RPMS SRPMS
