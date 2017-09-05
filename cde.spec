@@ -8,7 +8,7 @@
 
 Name:                cde
 Version:             2.2.4
-Release:             6%{?dist}
+Release:             7%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -30,6 +30,7 @@ Source7:             fonts.alias
 Source8:             fonts.dir
 
 Patch0:              cde-2.2.4-ttdbserver.patch
+Patch1:              cde-2.2.4-libast-ast.h.patch
 
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
@@ -47,6 +48,7 @@ Requires:            xorg-x11-fonts-ISO8859-9-100dpi
 Requires:            xorg-x11-fonts-ISO8859-14-100dpi
 Requires:            xorg-x11-fonts-ISO8859-15-100dpi
 Requires:            xorg-x11-fonts-100dpi
+Requires:            xorg-x11-fonts-misc
 
 BuildRequires:       xorg-x11-proto-devel
 %if 0%{?rhel} >= 7
@@ -85,6 +87,7 @@ CDE is the Common Desktop Environment from The Open Group.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
 
 sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 
@@ -144,6 +147,9 @@ install -D -m 0600 %SOURCE5 %{buildroot}%{_sysconfdir}/xinetd.d/dtspc
 install -D -m 0644 %SOURCE6 %{buildroot}%{_datadir}/xsessions/cde.desktop
 install -D -m 0644 %SOURCE7 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.alias
 install -D -m 0644 %SOURCE8 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.dir
+
+# Fix font paths in configuration files
+sed -i -e 's|/usr/lib/X11/fonts/misc|/usr/share/fonts/misc|g' %{buildroot}%{_prefix}/dt/config/C/fonts.list
 
 %clean
 rm -rf %{buildroot}
@@ -223,6 +229,10 @@ rm -rf $TMPDIR
 %{_datadir}/xsessions
 
 %changelog
+* Tue Sep 05 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-7
+- Small fix for libast/ast.h in the dtksh source
+- Require xorg-x11-fonts-misc to map to default CDE fonts
+
 * Thu Aug 24 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-6
 - Add fonts.alias and fonts.dir files for /etc/dt/config/xfonts/C
 - Patch /etc/xinetd.d/ttdbserver file to enable by default

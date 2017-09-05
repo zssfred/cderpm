@@ -7,6 +7,10 @@ RPMBUILD = rpmbuild --define='_topdir $(CWD)' \
                     --define='_specdir $(CWD)'
 URL = https://www.burdell.org/cde/
 
+NAME = $(shell grep Name: cde.spec | awk '{ print $$2; }')
+VERSION = $(shell grep Version: cde.spec | awk '{ print $$2; }')
+RELEASE = $(shell grep Release: cde.spec | awk '{ print $$2; }' | cut -d '%' -f 1)
+
 all: fetch
 	$(RPMBUILD) -ba cde.spec
 
@@ -45,6 +49,9 @@ install:
 
 source:
 	$(RPMBUILD) -bs cde.spec
+
+tag:
+	git tag -s $(NAME)-$(VERSION)-$(RELEASE)
 
 clean:
 	-rm -rf BUILD BUILDROOT RPMS SRPMS
