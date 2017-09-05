@@ -8,7 +8,7 @@
 
 Name:                cde
 Version:             2.2.4
-Release:             7%{?dist}
+Release:             8%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -28,6 +28,7 @@ Source5:             dtspc
 Source6:             cde.desktop
 Source7:             fonts.alias
 Source8:             fonts.dir
+Source9:             dtlogin.service
 
 Patch0:              cde-2.2.4-ttdbserver.patch
 Patch1:              cde-2.2.4-libast-ast.h.patch
@@ -52,7 +53,9 @@ Requires:            xorg-x11-fonts-misc
 
 BuildRequires:       xorg-x11-proto-devel
 %if 0%{?rhel} >= 7
+%{?systemd_requires}
 BuildRequires:       motif-devel
+BuildRequires:       systemd
 %endif
 %if 0%{?rhel} <= 6
 BuildRequires:       openmotif-devel
@@ -78,7 +81,6 @@ BuildRequires:       freetype-devel
 BuildRequires:       openssl-devel
 BuildRequires:       tcl-devel
 BuildRequires:       xorg-x11-xbitmaps
-BuildRequires:       libtirpc-devel
 BuildRequires:       libXdmcp-devel
 
 %description
@@ -94,9 +96,9 @@ sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 echo "#define KornShell /bin/ksh" >> config/cf/site.def
 echo "#define CppCmd cpp" >> config/cf/site.def
 echo "#define YaccCmd bison -y" >> config/cf/site.def
-echo "#define HasTIRPCLib YES" >> config/cf/site.def
 echo "#define HasZlib YES" >> config/cf/site.def
 echo "#define DtLocalesToBuild" >> config/cf/site.def
+echo "#define RegisterRPC" >> config/cf/site.def
 
 %build
 export LANG=C
@@ -151,6 +153,11 @@ install -D -m 0644 %SOURCE8 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.
 # Fix font paths in configuration files
 sed -i -e 's|/usr/lib/X11/fonts/misc|/usr/share/fonts/misc|g' %{buildroot}%{_prefix}/dt/config/C/fonts.list
 
+# Install systemd unit file on applicable systems
+%if 0%{?rhel} >= 7
+install -D -m 0644 %SOURCE9 %{buildroot}%{_unitdir}/dtlogin.service
+%endif
+
 %clean
 rm -rf %{buildroot}
 
@@ -180,7 +187,7 @@ echo "* Important postinstall steps for CDE *"
 echo "***************************************"
 echo
 echo "1) Enable and start rpcbind:"
-if [ -x /usr/sbin/systemctl ]; then
+if [ -x /usr/bin/systemctl ]; then
     echo "   systemctl enable rpcbind.service"
     echo "   systemctl start rpcbind.service"
 else
@@ -189,7 +196,7 @@ else
 fi
 echo
 echo "2) Enable and start xinetd:"
-if [ -x /usr/sbin/systemctl ]; then
+if [ -x /usr/bin/systemctl ]; then
     echo "   systemctl enable xinetd.service"
     echo "   systemctl start xinetd.service"
 else
@@ -227,8 +234,17 @@ rm -rf $TMPDIR
 %config %{_sysconfdir}/dt/config/xfonts/C/fonts.alias
 %config %{_sysconfdir}/dt/config/xfonts/C/fonts.dir
 %{_datadir}/xsessions
+%if 0%{?rhel} >= 7
+%{_unitdir}/dtlogin.service
+%endif
 
 %changelog
+* Tue Sep 05 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-8
+- In the postinstall script, check for systemctl in /usr/bin
+- Build with libtirpc-devel since that does not work correctly for CDE
+  on 64-bit platforms right now
+- Add systemd unit file for dtlogin for EL-7 and Fedora
+
 * Tue Sep 05 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-7
 - Small fix for libast/ast.h in the dtksh source
 - Require xorg-x11-fonts-misc to map to default CDE fonts
