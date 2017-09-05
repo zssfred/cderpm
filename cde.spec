@@ -8,7 +8,7 @@
 
 Name:                cde
 Version:             2.2.4
-Release:             8%{?dist}
+Release:             9%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -82,6 +82,7 @@ BuildRequires:       openssl-devel
 BuildRequires:       tcl-devel
 BuildRequires:       xorg-x11-xbitmaps
 BuildRequires:       libXdmcp-devel
+BuildRequires:       ncurses
 
 %description
 CDE is the Common Desktop Environment from The Open Group.
@@ -157,6 +158,13 @@ sed -i -e 's|/usr/lib/X11/fonts/misc|/usr/share/fonts/misc|g' %{buildroot}%{_pre
 %if 0%{?rhel} >= 7
 install -D -m 0644 %SOURCE9 %{buildroot}%{_unitdir}/dtlogin.service
 %endif
+
+# Create terminfo file for dtterm
+pushd programs/dtterm
+./terminfoCreate < terminfoChecklist > dtterm.terminfo
+tic dtterm.terminfo
+install -D -m 0644 dtterm %{buildroot}%{_datadir}/terminfo/d/dtterm
+popd
 
 %clean
 rm -rf %{buildroot}
@@ -234,11 +242,15 @@ rm -rf $TMPDIR
 %config %{_sysconfdir}/dt/config/xfonts/C/fonts.alias
 %config %{_sysconfdir}/dt/config/xfonts/C/fonts.dir
 %{_datadir}/xsessions
+%{_datadir}/terminfo
 %if 0%{?rhel} >= 7
 %{_unitdir}/dtlogin.service
 %endif
 
 %changelog
+* Tue Sep 05 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-9
+- Create /usr/share/terminfo/d/dtterm entry
+
 * Tue Sep 05 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-8
 - In the postinstall script, check for systemctl in /usr/bin
 - Build with libtirpc-devel since that does not work correctly for CDE
