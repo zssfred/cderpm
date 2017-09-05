@@ -53,8 +53,14 @@ source:
 tag:
 	git tag -m "Tag $(NAME)-$(VERSION)-$(RELEASE)" $(NAME)-$(VERSION)-$(RELEASE)
 
+clog:
+	@len=$$(($$(wc -l < cde.spec) - $$(sed -n '/%changelog/=' cde.spec))) ; \
+	top=$$(tail -n $$len cde.spec | sed -n '/^$$/=' | head -n 1) ; \
+	tail -n $$len cde.spec | head -n $$(($$top - 1)) > clog
+	@cat clog
+
 clean:
-	-rm -rf BUILD BUILDROOT RPMS SRPMS
+	-rm -rf BUILD BUILDROOT RPMS SRPMS clog
 
 realclean: clean
 	while read checksum filename ; do \
