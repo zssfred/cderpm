@@ -14,6 +14,8 @@ Summary:             Common Desktop Environment
 Group:               User Interface/Desktops
 License:             LGPLv2+
 URL:                 http://cdesktopenv.sourceforge.net/
+# This script works only for the superuser. 
+# use sudo rpmbuild -ba cde.spec or become root before rpmbuild step. 
 # Source is in git.  Actual releases can be found here:
 #     http://sourceforge.net/projects/cdesktopenv/files/
 # Source repo can be cloned this way:
@@ -31,7 +33,7 @@ Source8:             fonts.dir
 Source9:             dtlogin.service
 
 Patch0:              cde-2.2.4-ttdbserver.patch
-Patch1:              cde-2.2.4-libast-ast.h.patch
+#Patch1:              cde-2.2.4-libast-ast.h.patch
 
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
@@ -83,27 +85,26 @@ BuildRequires:       tcl-devel
 BuildRequires:       xorg-x11-xbitmaps
 BuildRequires:       libXdmcp-devel
 BuildRequires:       ncurses
-
+BuildRequires:       libtirpc-devel
 %description
 CDE is the Common Desktop Environment from The Open Group.
 
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
+#%patch1 -p1
 
 sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 
 echo "#define KornShell /bin/ksh" >> config/cf/site.def
-echo "#define CppCmd cpp" >> config/cf/site.def
-echo "#define YaccCmd bison -y" >> config/cf/site.def
 echo "#define HasZlib YES" >> config/cf/site.def
-echo "#define DtLocalesToBuild" >> config/cf/site.def
 echo "#define RegisterRPC" >> config/cf/site.def
-
+echo "#define HasTIRPCLib YES" >> config/cf/site.def 
+ 
 %build
-export LANG=C
-export LC_ALL=C
+# We have to do this so that app-defaults will be generated for ISO8859-1 locales. Any of fr_FR,it_IT,de_DE will do. 
+export LANG=fr_FR.ISO8859-1
+export LC_ALL=fr_FR.ISO8859-1
 export IMAKECPP=cpp
 %{__make} World BOOTSTRAPCFLAGS="%{optflags} %{_archflag}"
 sed -i -e 's:mkProd -D :&%{buildroot}:' admin/IntegTools/dbTools/installCDE
@@ -125,7 +126,8 @@ find %{buildroot}%{_prefix}/dt/bin -type f | \
 find %{buildroot}%{_prefix}/dt/lib -type f -name "lib*.so*" | xargs chrpath -d
 chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/instant
 chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/xlate_locale
-chrpath -d %{buildroot}%{_prefix}/dt/lib/dtudcfonted/*
+# dtudcfonted not built, so comment that out  
+#chrpath -d %{buildroot}%{_prefix}/dt/lib/dtudcfonted/*
 chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/dbdrv
 chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/dtinfogen_worker
 chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/dtinfo_start
@@ -138,6 +140,7 @@ chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/valBase
 chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/validator
 
 # Specific permissions required on some things
+chown root.mail %{buildroot}%{_prefix}/dt/bin/dtmail
 chmod 2555 %{buildroot}%{_prefix}/dt/bin/dtmail
 
 # Configuration files
@@ -150,9 +153,11 @@ install -D -m 0600 %SOURCE5 %{buildroot}%{_sysconfdir}/xinetd.d/dtspc
 install -D -m 0644 %SOURCE6 %{buildroot}%{_datadir}/xsessions/cde.desktop
 install -D -m 0644 %SOURCE7 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.alias
 install -D -m 0644 %SOURCE8 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.dir
+# This directory hierarchy must exist to build the RPM package 
+mkdirhier %{buildroot}%{_sysconfdir}/share/doc/ 
 
-# Fix font paths in configuration files
-sed -i -e 's|/usr/lib/X11/fonts/misc|/usr/share/fonts/misc|g' %{buildroot}%{_prefix}/dt/config/C/fonts.list
+# Fix font paths in configuration files (not needed for CERN Linux) 
+#sed -i -e 's|/usr/lib/X11/fonts/misc|/usr/share/fonts/misc|g' %{buildroot}%{_prefix}/dt/config/C/fonts.list
 
 # Install systemd unit file on applicable systems
 %if 0%{?rhel} >= 7
@@ -163,7 +168,7 @@ install -D -m 0644 %SOURCE9 %{buildroot}%{_unitdir}/dtlogin.service
 pushd programs/dtterm
 ./terminfoCreate < terminfoChecklist > dtterm.terminfo
 tic dtterm.terminfo
-install -D -m 0644 dtterm %{buildroot}%{_datadir}/terminfo/d/dtterm
+install -D -m 0644 /usr/share/terminfo/d/dtterm %{buildroot}%{_datadir}/terminfo/d/dtterm
 popd
 
 %clean
@@ -178,14 +183,14 @@ if [ $? -eq 1 ]; then
     echo -e "dtspc\t6112/tcp\t#subprocess control" >> /etc/services
 fi
 
-# Make sure rpcbind runs with -i
-if [ -f /etc/sysconfig/rpcbind ]; then
-    . /etc/sysconfig/rpcbind
-    echo "$RPCBIND_ARGS" | grep -q "\-i" >/dev/null 2>&1
-    [ $? -eq 1 ] && echo "RPCBIND_ARGS=\"-i\"" >> /etc/sysconfig/rpcbind
-else
-    echo "RPCBIND_ARGS=\"-i\"" >> /etc/sysconfig/rpcbind
-fi
+# Make sure rpcbind runs with -i (now unnecessary) 
+#if [ -f /etc/sysconfig/rpcbind ]; then
+#    . /etc/sysconfig/rpcbind
+#    echo "$RPCBIND_ARGS" | grep -q "\-i" >/dev/null 2>&1
+#    [ $? -eq 1 ] && echo "RPCBIND_ARGS=\"-i\"" >> /etc/sysconfig/rpcbind
+#else
+#    echo "RPCBIND_ARGS=\"-i\"" >> /etc/sysconfig/rpcbind
+#fi
 
 # Tell users what needs to happen once they have installed
 echo
@@ -248,6 +253,12 @@ rm -rf $TMPDIR
 %endif
 
 %changelog
+* Mon Jun 18 2018 Edmond Orignac <edmond.orignac@gmail.com> - 2.2.4-9a 
+- Added support for TIRPC to remove the necessity of rpcbind -i 
+- Removed some definitions of site.def redundant for Centos 7 CERN 
+- Added build for French, Italian, German, Spanish locales
+- Permissions for dtmail
+- Minor changes to permit the construction of rpm  
 * Tue Sep 05 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-9
 - Create /usr/share/terminfo/d/dtterm entry
 
