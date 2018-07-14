@@ -7,8 +7,8 @@
 %endif
 
 Name:                cde
-Version:             2.2.4
-Release:             9%{?dist}
+Version:             2.3.0
+Release:             1%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -100,6 +100,14 @@ echo "#define KornShell /bin/ksh" >> config/cf/site.def
 echo "#define HasZlib YES" >> config/cf/site.def
 echo "#define RegisterRPC" >> config/cf/site.def
 echo "#define HasTIRPCLib YES" >> config/cf/site.def 
+# Change that line to build the appropriate locales. Other possible choices are: 
+# el_GR.UTF-8 = Greek
+# ja_JP.dt-eucJP = Japanese
+# ko_KR.dt-eucKR = Korean
+# sv_SE.ISO8859-1 = Swedish
+# zh_CN.dt-eucCN = Simplified Chinese
+# zh_TW.dt-eucTW = Traditional Chinese
+echo "# define DtLocalesToBuild de_DE.ISO8859-1 es_ES.ISO8859-1 fr_FR.ISO8859-1 it_IT.ISO8859-1 en_US.UTF-8" >> config/cf/site.def
  
 %build
 # We have to do this so that app-defaults will be generated for ISO8859-1 locales. Any of fr_FR,it_IT,de_DE will do. 
@@ -126,7 +134,7 @@ find %{buildroot}%{_prefix}/dt/bin -type f | \
 find %{buildroot}%{_prefix}/dt/lib -type f -name "lib*.so*" | xargs chrpath -d
 chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/instant
 chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/xlate_locale
-# dtudcfonted not built, so comment that out  
+# dtudcfonted removed from CDE >=2.3.0   
 #chrpath -d %{buildroot}%{_prefix}/dt/lib/dtudcfonted/*
 chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/dbdrv
 chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/dtinfogen_worker
