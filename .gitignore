@@ -1,8 +1,10 @@
-*.tar.xz
 *.tar.gz
+*.tar.xz
 BUILD
 BUILDROOT
 RPMS
 SRPMS
-log
 clog
+log
+rpmbuild.out
+srpm

@@ -10,6 +10,7 @@ URL = https://www.burdell.org/cde/
 NAME = $(shell grep Name: cde.spec | awk '{ print $$2; }')
 VERSION = $(shell grep Version: cde.spec | awk '{ print $$2; }')
 RELEASE = $(shell grep Release: cde.spec | awk '{ print $$2; }' | cut -d '%' -f 1)
+ARCH = $(shell uname -m)
 
 all: fetch
 	$(RPMBUILD) -ba cde.spec
@@ -48,7 +49,18 @@ install:
 	$(RPMBUILD) -bi cde.spec
 
 source:
-	$(RPMBUILD) -bs cde.spec
+	$(RPMBUILD) -bs -v cde.spec 2>&1 | tee rpmbuild.out
+	echo $$(basename $$(cut -d ' ' -f 2 < rpmbuild.out)) > srpm
+	rm -f rpmbuild.out
+
+el6: source
+
+el7: source
+
+rawhide: source
+	mock -r fedora-rawhide-$(ARCH) --clean
+	mock -r fedora-rawhide-$(ARCH) --init
+	mock -r fedora-rawhide-$(ARCH) --rebuild $(CWD)/SRPMS/$$(cat srpm)
 
 tag:
 	git tag -m "Tag $(NAME)-$(VERSION)-$(RELEASE)" $(NAME)-$(VERSION)-$(RELEASE)

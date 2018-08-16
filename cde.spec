@@ -7,8 +7,8 @@
 %endif
 
 Name:                cde
-Version:             2.2.4
-Release:             9%{?dist}
+Version:             2.2.4a
+Release:             1%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -31,7 +31,6 @@ Source8:             fonts.dir
 Source9:             dtlogin.service
 
 Patch0:              cde-2.2.4-ttdbserver.patch
-Patch1:              cde-2.2.4-libast-ast.h.patch
 
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
@@ -83,6 +82,7 @@ BuildRequires:       tcl-devel
 BuildRequires:       xorg-x11-xbitmaps
 BuildRequires:       libXdmcp-devel
 BuildRequires:       ncurses
+BuildRequires:       libtirpc-devel
 
 %description
 CDE is the Common Desktop Environment from The Open Group.
@@ -90,7 +90,6 @@ CDE is the Common Desktop Environment from The Open Group.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
 
 sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 
