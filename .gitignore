@@ -7,4 +7,4 @@ SRPMS
 clog
 log
 rpmbuild.out
-srpm
+*.src.rpm
