@@ -52,18 +52,9 @@ install:
 
 srpm:
 	$(RPMBUILD) -bs -v cde.spec 2>&1 | tee rpmbuild.out
-	echo $$(basename $$(cut -d ' ' -f 2 < rpmbuild.out)) > srpm
+	srpm="$$(echo $$(basename $$(cut -d ' ' -f 2 < rpmbuild.out)))" ; \
+	mv $(CWD)/SRPMS/$$srpm $(CWD)
 	rm -f rpmbuild.out
-
-# Local building using mock
-local-el6: source
-
-local-el7: source
-
-local-rawhide: source
-	mock -r fedora-rawhide-$(ARCH) --clean
-	mock -r fedora-rawhide-$(ARCH) --init
-	mock -r fedora-rawhide-$(ARCH) --rebuild $(CWD)/SRPMS/$$(cat srpm)
 
 # Release helpers
 tag:
