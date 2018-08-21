@@ -7,7 +7,7 @@
 %endif
 
 Name:                cde
-Version:             2.2.4a
+Version:             2.3.0
 Release:             1%{?dist}
 Summary:             Common Desktop Environment
 
@@ -19,7 +19,7 @@ URL:                 http://cdesktopenv.sourceforge.net/
 # Source repo can be cloned this way:
 #     git clone git://git.code.sf.net/p/cdesktopenv/code cdesktopenv-code
 # The checkout-cde.sh generates the source archives used by this spec file.
-Source0:             %{name}-src-%{version}.tar.gz
+Source0:             %{name}-%{version}.tar.gz
 Source1:             checkout-cde.sh
 Source2:             dt.conf
 Source3:             dt.sh
@@ -60,6 +60,7 @@ BuildRequires:       systemd
 BuildRequires:       openmotif-devel
 %endif
 BuildRequires:       chrpath
+BuildRequires:       file
 BuildRequires:       ksh
 BuildRequires:       m4
 BuildRequires:       ncompress
@@ -118,23 +119,13 @@ popd
 # Remove the rpath setting from ELF objects.
 # XXX: This is a heavy hammer which should really be fixed by not using -rpath
 # in the build in the first place.  Baby steps.
-find %{buildroot}%{_prefix}/dt/bin -type f | \
-    grep -v -E "(lndir|mergelib|xon|makeg|xmkmf|mkdirhier|dtinfogen|dthelpgen.ds|dtlp|dtappintegrate|dtdocbook|Xsession|dtfile_error|dterror.ds|dthelptag|dthelpprint.sh|dtsession_res)" | \
-    xargs chrpath -d
-find %{buildroot}%{_prefix}/dt/lib -type f -name "lib*.so*" | xargs chrpath -d
-chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/instant
-chrpath -d %{buildroot}%{_prefix}/dt/dthelp/dtdocbook/xlate_locale
-chrpath -d %{buildroot}%{_prefix}/dt/lib/dtudcfonted/*
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/dbdrv
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/dtinfogen_worker
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/dtinfo_start
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/MixedGen
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/NCFGen
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/NodeParser
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/nsgmls
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/StyleUpdate
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/valBase
-chrpath -d %{buildroot}%{_prefix}/dt/infolib/etc/validator
+find %{buildroot}%{_prefix}/dt -type f | while read infile ; do
+    typ="$(file -b --mime-type $infile)"
+    if [ "$typ" = "application/x-executable" ] || [ "$typ" = "application/x-sharedlib" ]; then
+        chrpath -l $infile >/dev/null 2>&1
+        [ $? -eq 0 ] && chrpath -d $infile
+    fi
+done
 
 # Specific permissions required on some things
 chmod 2555 %{buildroot}%{_prefix}/dt/bin/dtmail
@@ -149,9 +140,6 @@ install -D -m 0600 %SOURCE5 %{buildroot}%{_sysconfdir}/xinetd.d/dtspc
 install -D -m 0644 %SOURCE6 %{buildroot}%{_datadir}/xsessions/cde.desktop
 install -D -m 0644 %SOURCE7 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.alias
 install -D -m 0644 %SOURCE8 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.dir
-
-# Fix font paths in configuration files
-sed -i -e 's|/usr/lib/X11/fonts/misc|/usr/share/fonts/misc|g' %{buildroot}%{_prefix}/dt/config/C/fonts.list
 
 # Install systemd unit file on applicable systems
 %if 0%{?rhel} >= 7
@@ -247,6 +235,9 @@ rm -rf $TMPDIR
 %endif
 
 %changelog
+* Thu Aug 16 2018 David Cantrell <dcantrell@redhat.com> - 2.3.0-1
+- Upgrade to CDE 2.3.0
+
 * Tue Sep 05 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-9
 - Create /usr/share/terminfo/d/dtterm entry
 

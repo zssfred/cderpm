@@ -15,6 +15,7 @@ ARCH = $(shell uname -m)
 all: fetch
 	$(RPMBUILD) -ba cde.spec
 
+# This could be improved from any of my other projects.
 fetch:
 	@while read checksum filename ; do \
 		if [ -f ${CWD}/$${filename} ]; then \
@@ -39,6 +40,7 @@ fetch:
 		fi ; \
 	done < $(CWD)/sources
 
+# Local RPM building right here in this directory
 prep:
 	$(RPMBUILD) -bp cde.spec
 
@@ -48,20 +50,22 @@ compile:
 install:
 	$(RPMBUILD) -bi cde.spec
 
-source:
+srpm:
 	$(RPMBUILD) -bs -v cde.spec 2>&1 | tee rpmbuild.out
 	echo $$(basename $$(cut -d ' ' -f 2 < rpmbuild.out)) > srpm
 	rm -f rpmbuild.out
 
-el6: source
+# Local building using mock
+local-el6: source
 
-el7: source
+local-el7: source
 
-rawhide: source
+local-rawhide: source
 	mock -r fedora-rawhide-$(ARCH) --clean
 	mock -r fedora-rawhide-$(ARCH) --init
 	mock -r fedora-rawhide-$(ARCH) --rebuild $(CWD)/SRPMS/$$(cat srpm)
 
+# Release helpers
 tag:
 	git tag -m "Tag $(NAME)-$(VERSION)-$(RELEASE)" $(NAME)-$(VERSION)-$(RELEASE)
 
@@ -71,6 +75,7 @@ clog:
 	tail -n $$len cde.spec | head -n $$(($$top - 1)) > clog
 	@cat clog
 
+# Housekeeping
 clean:
 	-rm -rf BUILD BUILDROOT RPMS SRPMS clog
 
