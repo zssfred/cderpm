@@ -50,7 +50,7 @@ compile:
 install:
 	$(RPMBUILD) -bi cde.spec
 
-srpm:
+srpm: fetch
 	$(RPMBUILD) -bs -v cde.spec 2>&1 | tee rpmbuild.out
 	srpm="$$(echo $$(basename $$(cut -d ' ' -f 2 < rpmbuild.out)))" ; \
 	mv $(CWD)/SRPMS/$$srpm $(CWD)
