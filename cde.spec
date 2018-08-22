@@ -8,7 +8,7 @@
 
 Name:                cde
 Version:             2.3.0
-Release:             1%{?dist}
+Release:             2%{?dist}
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -60,7 +60,6 @@ BuildRequires:       systemd
 %if 0%{?rhel} <= 6
 BuildRequires:       openmotif-devel
 %endif
-BuildRequires:       rpcgen
 BuildRequires:       patchelf
 BuildRequires:       file
 BuildRequires:       ksh
@@ -86,6 +85,12 @@ BuildRequires:       xorg-x11-xbitmaps
 BuildRequires:       libXdmcp-devel
 BuildRequires:       ncurses
 BuildRequires:       libtirpc-devel
+
+# /usr/bin/rpcgen exists in glibc-common in older releases, otherwise we
+# have to explicitly pull in the rpcgen package
+%if 0%{?rhel} > 7 || 0%{?fedora} > 27
+BuildRequires:       rpcgen
+%endif
 
 %description
 CDE is the Common Desktop Environment from The Open Group.
@@ -238,6 +243,9 @@ rm -rf $TMPDIR
 %endif
 
 %changelog
+* Wed Aug 22 2018 David Cantrell <dcantrell@redhat.com> - 2.3.0-2
+- Conditionalize the BR on rpcgen for only recent systems
+
 * Thu Aug 16 2018 David Cantrell <dcantrell@redhat.com> - 2.3.0-1
 - Upgrade to CDE 2.3.0
 - Use patchelf rather than chrpath in %%install
