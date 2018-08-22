@@ -31,6 +31,7 @@ Source8:             fonts.dir
 Source9:             dtlogin.service
 
 Patch0:              cde-2.2.4-ttdbserver.patch
+Patch1:              cde-2.3.0-ustat.h.patch
 
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
@@ -59,7 +60,8 @@ BuildRequires:       systemd
 %if 0%{?rhel} <= 6
 BuildRequires:       openmotif-devel
 %endif
-BuildRequires:       chrpath
+BuildRequires:       rpcgen
+BuildRequires:       patchelf
 BuildRequires:       file
 BuildRequires:       ksh
 BuildRequires:       m4
@@ -91,6 +93,7 @@ CDE is the Common Desktop Environment from The Open Group.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p2
 
 sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 
@@ -122,8 +125,8 @@ popd
 find %{buildroot}%{_prefix}/dt -type f | while read infile ; do
     typ="$(file -b --mime-type $infile)"
     if [ "$typ" = "application/x-executable" ] || [ "$typ" = "application/x-sharedlib" ]; then
-        chrpath -l $infile >/dev/null 2>&1
-        [ $? -eq 0 ] && chrpath -d $infile
+        rpath="$(patchelf --print-rpath $infile >/dev/null 2>&1)"
+        [ -z "$rpath" ] || patchelf --remove-rpath $infile
     fi
 done
 
@@ -237,6 +240,9 @@ rm -rf $TMPDIR
 %changelog
 * Thu Aug 16 2018 David Cantrell <dcantrell@redhat.com> - 2.3.0-1
 - Upgrade to CDE 2.3.0
+- Use patchelf rather than chrpath in %%install
+- Build requires rpcgen
+- Replace deprecated/removed ustat(2) calls with statfs(2)
 
 * Tue Sep 05 2017 David Cantrell <dcantrell@redhat.com> - 2.2.4-9
 - Create /usr/share/terminfo/d/dtterm entry
