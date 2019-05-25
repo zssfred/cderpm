@@ -40,11 +40,11 @@ To get started, initialize the mock build root:
 
 Now build the source RPM (SRPM):
 
-    make source
+    make srpm
 
 Now build that SRPM in mock:
 
-    mock -r centos-7-x86_64 rebuild SRPMS/*.src.rpm
+    mock -r centos-7-x86_64 rebuild *.src.rpm
 
 The rebuild command will clean and initialize the root tree as well, in theory.
 To remove or clean the build root, run:

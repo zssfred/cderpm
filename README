@@ -1,16 +1,18 @@
 cderpm
 ======
 
-RPM spec file, patches, and scripts to package up the Common Desktop Environment.
+RPM spec file, patches, and scripts to package up the Common Desktop
+Environment.
 
-The Common Desktop Environment (CDE) from The Open Group is now available under
-the GNU Lesser General Public License version 2.1 or later (LGPLv2+).  The project
-can be found here:
+The Common Desktop Environment (CDE) from The Open Group is now available
+under the GNU Lesser General Public License version 2.1 or later (LGPLv2+).
+The project can be found here:
 
     http://sourceforge.net/projects/cdesktopenv/
 
-This project is an RPM spec file and related files used to build an installable
-CDE package for Red Hat Enterprise Linux and Fedora Linux systems.
+This project is an RPM spec file and related files used to build an
+installable CDE package for Red Hat Enterprise Linux and Fedora Linux
+systems.
 
 
 TARGET PLATFORMS
@@ -20,10 +22,28 @@ Red Hat Enterprise Linux 7 (x86_64)
 Red Hat Enterprise Linux 6 (x86_64)
 CentOS 7 (x86_64)
 CentOS 6 (x86_64)
+Fedora 27 (x86_64)
+Fedora 28 (x86_64)
+Fedora rawhide (x86_64)
 
 I may not have all platforms building at a given time, which is why I refer to
 them as targets rather than requirements.  I'm always interested in patches to
 get things building and packaging on other Red Hat-derived distributions.
+
+
+AVAILABILITY
+------------
+
+Builds are done using the COPR infrastructure in the Fedora Project.  Users
+of RHEL, CentOS, and Fedora can enable the 'cde' copr repository and then
+install the 'cde' package using yum or dnf:
+
+    dnf copr enable dcantrell/cde
+    dnf install cde
+
+Older systems using yum may have slightly different steps to enable the
+repo.  If you figure that out, please let me know so I can add it to the
+README file.
 
 
 AUTHORS
