@@ -38,7 +38,7 @@ Builds are done using the COPR infrastructure in the Fedora Project.  Users
 of RHEL, CentOS, and Fedora can enable the 'cde' copr repository and then
 install the 'cde' package using yum or dnf:
 
-    dnf copr enable dcantrell/cde
+    dnf copr enable dcantrel/cde
     dnf install cde
 
 Older systems using yum may have slightly different steps to enable the
