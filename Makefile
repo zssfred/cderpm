@@ -58,7 +58,7 @@ srpm: fetch
 
 # Release helpers
 tag:
-	git tag -m "Tag $(NAME)-$(VERSION)-$(RELEASE)" $(NAME)-$(VERSION)-$(RELEASE)
+	git tag -s -m "Tag $(NAME)-$(VERSION)-$(RELEASE)" $(NAME)-$(VERSION)-$(RELEASE)
 
 clog:
 	@len=$$(($$(wc -l < cde.spec) - $$(sed -n '/%changelog/=' cde.spec))) ; \
