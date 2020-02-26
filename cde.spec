@@ -6,9 +6,30 @@
 %define _archflag -m32
 %endif
 
+# Set a macro to use for distribution variances
+%if 0%{?fedora}
+%define _distribution fedora
+%endif
+
+%if 0%{?rhel}
+%define _distribution rhel
+%endif
+
+%if 0%{?epel}
+%define _distribution epel
+%endif
+
+%if "%{?distsuffix:%{distsuffix}}%{!?distsuffix:0}" == "pclos"
+%define _distribution pclos
+%endif
+
 Name:                cde
 Version:             2.3.0
-Release:             2%{?dist}
+%if "%{_distribution}" == "pclos"
+Release:             %mkrel 3
+%else
+Release:             3%{?dist}
+%endif
 Summary:             Common Desktop Environment
 
 Group:               User Interface/Desktops
@@ -37,11 +58,10 @@ BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
 Requires:            xinetd
 Requires:            ksh
+%if "%{_distribution}" == "fedora" || "%{_distribution}" == "rhel" || "%{_distribution}" == "epel"
 Requires:            xorg-x11-xinit
 Requires:            xorg-x11-utils
 Requires:            xorg-x11-server-utils
-Requires:            ncompress
-Requires:            rpcbind
 Requires:            xorg-x11-server-Xorg
 Requires:            xorg-x11-fonts-ISO8859-1-100dpi
 Requires:            xorg-x11-fonts-ISO8859-2-100dpi
@@ -50,7 +70,20 @@ Requires:            xorg-x11-fonts-ISO8859-14-100dpi
 Requires:            xorg-x11-fonts-ISO8859-15-100dpi
 Requires:            xorg-x11-fonts-100dpi
 Requires:            xorg-x11-fonts-misc
+%endif
+%if "%{_distribution}" == "pclos"
+Requires:            xinit
+Requires:            xset
+Requires:            bdftopcf
+Requires:            x11-server-xorg
+Requires:            x11-font-misc
+# for dtterm terminfo definition
+Requires:            ncurses-extraterms
+%endif
+Requires:            ncompress
+Requires:            rpcbind
 
+%if "%{_distribution}" == "fedora" || "%{_distribution}" == "rhel" || "%{_distribution}" == "epel"
 BuildRequires:       xorg-x11-proto-devel
 %if 0%{?rhel} >= 7
 %{?systemd_requires}
@@ -61,6 +94,12 @@ BuildRequires:       systemd
 BuildRequires:       openmotif-devel
 %endif
 BuildRequires:       patchelf
+%endif
+%if "%{_distribution}" == "pclos"
+BuildRequires:       x11-proto-devel
+BuildRequires:       lib64openmotif4
+BuildRequires:       lib64openmotif4-devel
+%endif
 BuildRequires:       file
 BuildRequires:       ksh
 BuildRequires:       m4
@@ -68,6 +107,7 @@ BuildRequires:       ncompress
 BuildRequires:       bison
 BuildRequires:       byacc
 BuildRequires:       gcc-c++
+%if "%{_distribution}" == "fedora" || "%{_distribution}" == "rhel" || "%{_distribution}" == "epel"
 BuildRequires:       libXp-devel
 BuildRequires:       libXt-devel
 BuildRequires:       libXmu-devel
@@ -83,8 +123,34 @@ BuildRequires:       openssl-devel
 BuildRequires:       tcl-devel
 BuildRequires:       xorg-x11-xbitmaps
 BuildRequires:       libXdmcp-devel
+BuildRequires:       libtirpc-devel
+%endif
+%if "%{_distribution}" == "pclos"
+BuildRequires:       lib64xp-devel
+BuildRequires:       lib64xt-devel
+BuildRequires:       lib64xmu-devel
+BuildRequires:       lib64xft-devel
+BuildRequires:       lib64xinerama-devel
+BuildRequires:       lib64xpm-devel
+BuildRequires:       lib64xaw-devel
+BuildRequires:       lib64x11-devel
+BuildRequires:       lib64xscrnsaver-devel
+BuildRequires:       lib64jpeg-devel
+BuildRequires:       lib64freetype6-devel
+BuildRequires:       lib64openssl-devel
+BuildRequires:       lib64tcl-devel
+BuildRequires:       x11-data-bitmaps
+BuildRequires:       lib64xdmcp-devel
+BuildRequires:       lib64tirpc-devel
+%endif
 BuildRequires:       ncurses
 BuildRequires:       libtirpc-devel
+
+# /usr/bin/rpcgen exists in glibc-common in older releases, otherwise we
+# have to explicitly pull in the rpcgen package
+%if 0%{?rhel} > 7 || 0%{?fedora} > 27
+BuildRequires:       rpcgen
+%endif
 
 # /usr/bin/rpcgen exists in glibc-common in older releases, otherwise we
 # have to explicitly pull in the rpcgen package
@@ -124,6 +190,7 @@ export LC_ALL=C
 ./installCDE -s "$srcdir" -pseudo -pI "%{buildroot}%{_prefix}/dt" -pV "%{buildroot}%{_localstatedir}/dt" -pC "%{buildroot}%{_sysconfdir}/dt"
 popd
 
+%if "%{_distribution}" == "fedora" || "%{_distributon}" == "rhel" || "%{_distribution}" == "epel"
 # Remove the rpath setting from ELF objects.
 # XXX: This is a heavy hammer which should really be fixed by not using -rpath
 # in the build in the first place.  Baby steps.
@@ -134,6 +201,7 @@ find %{buildroot}%{_prefix}/dt -type f | while read infile ; do
         [ -z "$rpath" ] || patchelf --remove-rpath $infile
     fi
 done
+%endif
 
 # Specific permissions required on some things
 chmod 2555 %{buildroot}%{_prefix}/dt/bin/dtmail
@@ -149,6 +217,7 @@ install -D -m 0644 %SOURCE6 %{buildroot}%{_datadir}/xsessions/cde.desktop
 install -D -m 0644 %SOURCE7 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.alias
 install -D -m 0644 %SOURCE8 %{buildroot}%{_sysconfdir}/dt/config/xfonts/C/fonts.dir
 
+%if "%{_distribution}" == "fedora" || "%{_distribution}" == "rhel" || "%{_distribution}" == "epel"
 # Install systemd unit file on applicable systems
 %if 0%{?rhel} >= 7
 install -D -m 0644 %SOURCE9 %{buildroot}%{_unitdir}/dtlogin.service
@@ -160,6 +229,7 @@ pushd programs/dtterm
 tic dtterm.terminfo
 install -D -m 0644 dtterm %{buildroot}%{_datadir}/terminfo/d/dtterm
 popd
+%endif
 
 %clean
 rm -rf %{buildroot}
@@ -237,7 +307,9 @@ rm -rf $TMPDIR
 %config %{_sysconfdir}/dt/config/xfonts/C/fonts.alias
 %config %{_sysconfdir}/dt/config/xfonts/C/fonts.dir
 %{_datadir}/xsessions
+%if "%{_distribution}" == "fedora" || "%{_distribution}" == "rhel" || "%{_distribution}" == "epel"
 %{_datadir}/terminfo
+%endif
 %if 0%{?rhel} >= 7
 %{_unitdir}/dtlogin.service
 %endif

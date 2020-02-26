@@ -10,10 +10,12 @@ URL = https://www.burdell.org/cde/
 NAME = $(shell grep Name: cde.spec | awk '{ print $$2; }')
 VERSION = $(shell grep Version: cde.spec | awk '{ print $$2; }')
 RELEASE = $(shell grep Release: cde.spec | awk '{ print $$2; }' | cut -d '%' -f 1)
+ARCH = $(shell uname -m)
 
 all: fetch
 	$(RPMBUILD) -ba cde.spec
 
+# This could be improved from any of my other projects.
 fetch:
 	@while read checksum filename ; do \
 		if [ -f ${CWD}/$${filename} ]; then \
@@ -38,6 +40,7 @@ fetch:
 		fi ; \
 	done < $(CWD)/sources
 
+# Local RPM building right here in this directory
 prep:
 	$(RPMBUILD) -bp cde.spec
 
@@ -47,11 +50,15 @@ compile:
 install:
 	$(RPMBUILD) -bi cde.spec
 
-source:
-	$(RPMBUILD) -bs cde.spec
+srpm: fetch
+	$(RPMBUILD) -bs -v cde.spec 2>&1 | tee rpmbuild.out
+	srpm="$$(echo $$(basename $$(cut -d ' ' -f 2 < rpmbuild.out)))" ; \
+	mv $(CWD)/SRPMS/$$srpm $(CWD)
+	rm -f rpmbuild.out
 
+# Release helpers
 tag:
-	git tag -m "Tag $(NAME)-$(VERSION)-$(RELEASE)" $(NAME)-$(VERSION)-$(RELEASE)
+	git tag -s -m "Tag $(NAME)-$(VERSION)-$(RELEASE)" $(NAME)-$(VERSION)-$(RELEASE)
 
 clog:
 	@len=$$(($$(wc -l < cde.spec) - $$(sed -n '/%changelog/=' cde.spec))) ; \
@@ -59,6 +66,7 @@ clog:
 	tail -n $$len cde.spec | head -n $$(($$top - 1)) > clog
 	@cat clog
 
+# Housekeeping
 clean:
 	-rm -rf BUILD BUILDROOT RPMS SRPMS clog
 
