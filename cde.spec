@@ -24,7 +24,7 @@
 %endif
 
 Name:                cde
-Version:             2.3.0
+Version:             2.3.2
 %if "%{_distribution}" == "pclos"
 Release:             %mkrel 3
 %else
@@ -51,17 +51,20 @@ Source7:             fonts.alias
 Source8:             fonts.dir
 Source9:             dtlogin.service
 
-Patch0:              cde-2.2.4-ttdbserver.patch
-Patch1:              cde-2.3.0-ustat.h.patch
+Patch0:              cde-2.3.2-glibc-2.33.patch
 
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
 Requires:            xinetd
 Requires:            ksh
+%if "%{_distribution}" == "fedora"
+Requires:            xstdcmap
+%else
+Requires:            xorg-x11-server-utils
+%endif
 %if "%{_distribution}" == "fedora" || "%{_distribution}" == "rhel" || "%{_distribution}" == "epel"
 Requires:            xorg-x11-xinit
 Requires:            xorg-x11-utils
-Requires:            xorg-x11-server-utils
 Requires:            xorg-x11-server-Xorg
 Requires:            xorg-x11-fonts-ISO8859-1-100dpi
 Requires:            xorg-x11-fonts-ISO8859-2-100dpi
@@ -100,6 +103,7 @@ BuildRequires:       x11-proto-devel
 BuildRequires:       lib64openmotif4
 BuildRequires:       lib64openmotif4-devel
 %endif
+BuildRequires:       bdftopcf
 BuildRequires:       file
 BuildRequires:       ksh
 BuildRequires:       m4
@@ -157,7 +161,6 @@ CDE is the Common Desktop Environment from The Open Group.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p2
 
 sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 
@@ -177,11 +180,9 @@ sed -i -e 's:mkProd -D :&%{buildroot}:' admin/IntegTools/dbTools/installCDE
 
 %install
 srcdir="$(pwd)"
-pushd admin/IntegTools/dbTools
 export LANG=C
 export LC_ALL=C
-./installCDE -s "$srcdir" -pseudo -pI "%{buildroot}%{_prefix}/dt" -pV "%{buildroot}%{_localstatedir}/dt" -pC "%{buildroot}%{_sysconfdir}/dt"
-popd
+./admin/IntegTools/dbTools/installCDE -s "$srcdir" -pseudo -pI "%{buildroot}%{_prefix}/dt" -pV "%{buildroot}%{_localstatedir}/dt" -pC "%{buildroot}%{_sysconfdir}/dt" -destdir "%{buildroot}"
 
 %if "%{_distribution}" == "fedora" || "%{_distributon}" == "rhel" || "%{_distribution}" == "epel"
 # Remove the rpath setting from ELF objects.

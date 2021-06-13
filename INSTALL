@@ -1,5 +1,15 @@
 1) Install the RPM for your platform.
 
+On Fedora 34 and higher the xinitd package is no longer included.
+You can however build and install an rpm from the fc33 sources.
+
+The .src.rpm file can be downloaded here:
+https://koji.fedoraproject.org/koji/buildinfo?buildID=1577957
+
+Install the .src.rpm file, and in your rpmbuild directory's `SPECS` dir (e.g.
+`~/rpmbuild/SPECS`) run `rpmbuild -ba xinetd.spec`. After successful build you
+will be able to install the rpm from your rpmbuild directory's RPMS dir.
+
 2) Make sure rpcbind is running:
        RHEL or CentOS 7.x:
            systemctl enable rpcbind.service
