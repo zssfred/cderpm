@@ -148,6 +148,13 @@ BuildRequires:       lib64xdmcp-devel
 BuildRequires:       lib64tirpc-devel
 %endif
 BuildRequires:       ncurses
+BuildRequires:       libtirpc-devel
+
+# /usr/bin/rpcgen exists in glibc-common in older releases, otherwise we
+# have to explicitly pull in the rpcgen package
+%if 0%{?rhel} > 7 || 0%{?fedora} > 27
+BuildRequires:       rpcgen
+%endif
 
 # /usr/bin/rpcgen exists in glibc-common in older releases, otherwise we
 # have to explicitly pull in the rpcgen package
