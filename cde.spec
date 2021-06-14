@@ -59,12 +59,13 @@ Requires:            xinetd
 Requires:            ksh
 %if "%{_distribution}" == "fedora"
 Requires:            xstdcmap
+Requires:            ( xorg-x11-utils or xdpyinfo or xwininfo or xvinfo or xprop or xlsfonts or xlsclients or xlsatoms or xev )
 %else
 Requires:            xorg-x11-server-utils
+Requires:            xorg-x11-utils
 %endif
 %if "%{_distribution}" == "fedora" || "%{_distribution}" == "rhel" || "%{_distribution}" == "epel"
 Requires:            xorg-x11-xinit
-Requires:            xorg-x11-utils
 Requires:            xorg-x11-server-Xorg
 Requires:            xorg-x11-fonts-ISO8859-1-100dpi
 Requires:            xorg-x11-fonts-ISO8859-2-100dpi
