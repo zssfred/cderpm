@@ -9,10 +9,21 @@ You'll need the source for CDE to do anything:
 
     make fetch
 
-These are downloaded from https://www.burdell.org/cde/ because the upstream
-project releases on SourceFroge which does not permit curl(1) or wget(1) to
+
+Option 1: build from an existing release
+
+The sources are downloaded from https://www.burdell.org/cde/ because the upstream
+project releases on SourceForge which does not permit curl(1) or wget(1) to
 easily download links.  The 'sources' file lists the source archive(s) needed
 for CDE and a digest that is verified once downloaded.  
+
+
+Option 2: build from an existing commit in the project's git
+
+In this case the code is cloned from the project's central git repository. 
+The commit to check out is controlled by the `cde.spec` file: if the macro
+definition `_githash` is non-empty, `make fetch` will automatically clone
+the repo and try to checkout the commit specified by the `_githash` macro.
 
 
 BUILD THE RPM

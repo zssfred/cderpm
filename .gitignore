@@ -8,3 +8,4 @@ clog
 log
 rpmbuild.out
 *.src.rpm
+cdesktopenv-code
