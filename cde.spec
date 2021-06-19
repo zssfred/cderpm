@@ -23,8 +23,16 @@
 %define _distribution pclos
 %endif
 
+%define _githash f294ef4a
+%if "%{_githash}" == ""
+%define _git
+%else
+%define _git git%{_githash}
+%endif
+%define _cdeversion 2.3.2
+
 Name:                cde
-Version:             2.3.2
+Version:             %{_cdeversion}%{_git}
 %if "%{_distribution}" == "pclos"
 Release:             %mkrel 3
 %else
@@ -50,8 +58,6 @@ Source6:             cde.desktop
 Source7:             fonts.alias
 Source8:             fonts.dir
 Source9:             dtlogin.service
-
-Patch0:              cde-2.3.2-glibc-2.33.patch
 
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
@@ -161,7 +167,6 @@ CDE is the Common Desktop Environment from The Open Group.
 
 %prep
 %setup -q
-%patch0 -p1
 
 sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 

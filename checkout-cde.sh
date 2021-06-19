@@ -1,17 +1,28 @@
 #!/bin/sh
 
+errorExit() {
+	echo "*** $*" 1>&2
+	exit 1
+}
+
+VER="$(grep '^%define *_cdeversion' cde.spec | awk '{ print $3; }')"
+GITHASH="$(grep '^%define *_githash' cde.spec | awk '{ print $3; }')"
 CWD=$(pwd)
-rm -rf cdesktopenv-code
-git clone git://git.code.sf.net/p/cdesktopenv/code cdesktopenv-code
-cd cdesktopenv-code/cde
-GITHASH="$(git log --pretty=format:'%h' -n 1)"
-DATESTAMP="$(date +%Y%m%d)"
-VER="$(grep RELEASE Makefile | grep "=" | awk '{ print $4; }')"
+if cd cdesktopenv-code/cde 2>/dev/null; then
+	git reset --hard HEAD || errorExit "Error git reset"
+	git fetch || errorExit "Error git fetch"
+	git checkout master || errorExit "Error git checkout"
+else
+	git clone --recursive git://git.code.sf.net/p/cdesktopenv/code cdesktopenv-code || errorExit "Error git clone"
+	cd cdesktopenv-code/cde || errorExit "Error chdir"
+fi
+if [ -n "${GITHASH}" ]; then
+	git checkout ${GITHASH} || errorExit "Error git checkout ${GITHASH}"
+else
+	GITHASH="$(git log --pretty=format:'%h' -n 1)"
+fi
 cd ${CWD}
-find cdesktopenv-code -type d -name .git | xargs rm -rf
-OUTPUT="cde-${VER}-${DATESTAMP}git${GITHASH}.tar.xz"
-tar -cvf - cdesktopenv-code | xz -9c > ${OUTPUT}
-rm -rf cdesktopenv-code
-sha1sum ${OUTPUT} > ${CWD}/sources
+OUTPUT="cde-${VER}git${GITHASH}.tar.gz"
+tar --transform="s/cdesktopenv-code\/cde\//cde-${VER}git${GITHASH}\//" -czvf ${OUTPUT} cdesktopenv-code/cde || errorExit "Error tar"
 echo
 echo "New source archived to ${OUTPUT}"
