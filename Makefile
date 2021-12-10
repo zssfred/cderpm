@@ -1,6 +1,8 @@
 # Makefile to drive local builds of the cde RPM.
 # Author:  David Cantrell <david.l.cantrell@gmail.com>
 
+.PHONY: all clean clog compile fetch fetch-git fetch-release install prep realclean srpm tag
+
 CWD := $(shell pwd)
 RPMBUILD = rpmbuild --define='_topdir $(CWD)' \
                     --define='_sourcedir $(CWD)' \
@@ -8,7 +10,8 @@ RPMBUILD = rpmbuild --define='_topdir $(CWD)' \
 URL = https://www.burdell.org/cde/
 
 NAME = $(shell grep Name: cde.spec | awk '{ print $$2; }')
-VERSION = $(shell grep Version: cde.spec | awk '{ print $$2; }')
+GITHASH = $(shell grep '^%define *_githash' cde.spec | awk '{ print $$3; }')
+VERSION = $(shell grep '^%define *_cdeversion' cde.spec | awk '{ print $$3; }')
 RELEASE = $(shell grep Release: cde.spec | awk '{ print $$2; }' | cut -d '%' -f 1)
 ARCH = $(shell uname -m)
 
@@ -17,6 +20,12 @@ all: fetch
 
 # This could be improved from any of my other projects.
 fetch:
+	@if [ -n "$(GITHASH)" ]; then $(MAKE) fetch-git; else $(MAKE) fetch-release; fi
+
+fetch-git:
+	@if [ ! -r cde-$(VERSION)git$(GITHASH).tar.gz ]; then ./checkout-cde.sh || exit 1; fi
+
+fetch-release:
 	@while read checksum filename ; do \
 		if [ -f ${CWD}/$${filename} ]; then \
 			computed="$$(sha256sum $(CWD)/$${filename} | cut -d ' ' -f 1)" ; \

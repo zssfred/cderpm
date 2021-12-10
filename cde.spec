@@ -23,8 +23,16 @@
 %define _distribution pclos
 %endif
 
+%define _githash f294ef4a
+%if "%{_githash}" == ""
+%define _git
+%else
+%define _git git%{_githash}
+%endif
+%define _cdeversion 2.3.2
+
 Name:                cde
-Version:             2.3.2
+Version:             %{_cdeversion}%{_git}
 %if "%{_distribution}" == "pclos"
 Release:             %mkrel 3
 %else
@@ -51,20 +59,19 @@ Source7:             fonts.alias
 Source8:             fonts.dir
 Source9:             dtlogin.service
 
-Patch0:              cde-2.3.2-glibc-2.33.patch
-
 BuildRoot:           %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 
 Requires:            xinetd
 Requires:            ksh
 %if "%{_distribution}" == "fedora"
 Requires:            xstdcmap
+Requires:            ( xorg-x11-utils or xdpyinfo or xwininfo or xvinfo or xprop or xlsfonts or xlsclients or xlsatoms or xev )
 %else
 Requires:            xorg-x11-server-utils
+Requires:            xorg-x11-utils
 %endif
 %if "%{_distribution}" == "fedora" || "%{_distribution}" == "rhel" || "%{_distribution}" == "epel"
 Requires:            xorg-x11-xinit
-Requires:            xorg-x11-utils
 Requires:            xorg-x11-server-Xorg
 Requires:            xorg-x11-fonts-ISO8859-1-100dpi
 Requires:            xorg-x11-fonts-ISO8859-2-100dpi
@@ -160,7 +167,6 @@ CDE is the Common Desktop Environment from The Open Group.
 
 %prep
 %setup -q
-%patch0 -p1
 
 sed -i -e '1i #define FILE_MAP_OPTIMIZE' programs/dtfile/Utils.c
 
